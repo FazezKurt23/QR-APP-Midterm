@@ -145,7 +145,7 @@ export default function TeacherScreen() {
         value={title}
         onChangeText={setTitle}
         placeholder="Founders Day Assembly"
-        placeholderTextColor={COLORS.textSecondary}
+        placeholderTextColor={COLORS.muted}
       />
 
       <Text style={styles.label}>Event Code</Text>
@@ -154,7 +154,7 @@ export default function TeacherScreen() {
         value={eventId}
         onChangeText={setEventId}
         placeholder="EVT-2026-0001"
-        placeholderTextColor={COLORS.textSecondary}
+        placeholderTextColor={COLORS.muted}
         autoCapitalize="characters"
       />
 
@@ -268,11 +268,12 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: COLORS.card,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor:COLORS.border,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    color:COLORS.textPrimary,
   },
   inputText: {
     fontSize: 16,
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
@@ -300,10 +301,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: COLORS.primary,
     borderWidth: 1,
-    borderColor: COLORS.primary,
-    borderRadius: 10,
+    borderColor: '#A78BFA',
+    borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.55,
+    shadowRadius: 12,
+    elevation: 8,
   },
   primaryButtonText: {
     color: COLORS.textOnPrimary,
@@ -317,16 +323,21 @@ const styles = StyleSheet.create({
   },
   qrCard: {
     marginTop: 20,
-    backgroundColor: COLORS.card,
-    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.cardBorderNeon,
     padding: 20,
     alignItems: 'center',
     gap: 12,
+    shadowColor: '#D946EF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
   },
   payloadText: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: '#4B5563',
   },
 });

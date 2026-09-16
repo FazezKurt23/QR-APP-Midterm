@@ -113,7 +113,7 @@ export default function RegisterScreen() {
                   value={fullName}
                   onChangeText={setFullName}
                   placeholder="Juan Dela Cruz"
-                  placeholderTextColor={COLORS.textSecondary}
+                  placeholderTextColor={COLORS.muted}
                   editable={!loading}
                 />
 
@@ -123,7 +123,7 @@ export default function RegisterScreen() {
                   value={email}
                   onChangeText={setEmail}
                   placeholder="your.email@school.edu"
-                  placeholderTextColor={COLORS.textSecondary}
+                  placeholderTextColor={COLORS.muted}
                   autoCapitalize="none"
                   keyboardType="email-address"
                   editable={!loading}
@@ -135,7 +135,7 @@ export default function RegisterScreen() {
                   value={password}
                   onChangeText={setPassword}
                   placeholder="At least 6 characters"
-                  placeholderTextColor={COLORS.textSecondary}
+                  placeholderTextColor={COLORS.muted}
                   secureTextEntry
                   editable={!loading}
                 />
@@ -146,7 +146,7 @@ export default function RegisterScreen() {
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   placeholder="Re-enter your password"
-                  placeholderTextColor={COLORS.textSecondary}
+                  placeholderTextColor={COLORS.muted}
                   secureTextEntry
                   editable={!loading}
                 />
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: COLORS.card,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingHorizontal: 14,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   roleChip: {
     flex: 1,
     backgroundColor: COLORS.card,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingVertical: 12,
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   roleChipActive: {
     borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary + '14',
+    backgroundColor: '#8B5CF622',
   },
   roleChipText: {
     fontSize: 15,
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   roleChipTextActive: {
     fontWeight: '700',
-    color: COLORS.primary,
+    color: COLORS.textPrimary,
   },
   error: {
     fontSize: 14,
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 14,
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontWeight: '600',
   },
   successContainer: {
@@ -315,9 +315,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     padding: 20,
     backgroundColor: COLORS.card,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.cardBorderNeon,
   },
   successTitle: {
     fontSize: 18,

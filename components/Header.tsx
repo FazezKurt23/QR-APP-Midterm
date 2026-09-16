@@ -13,7 +13,7 @@ export default function Header({ title }: HeaderProps) {
         <MaterialIcons
           name="qr-code-scanner"
           size={36}
-          color={COLORS.primary}
+          color={COLORS.accent}
         />
       </View>
       <Text style={styles.title}>{title}</Text>
@@ -31,10 +31,15 @@ const styles = StyleSheet.create({
     borderRadius: 36,
     backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.accent,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
+    shadowColor: '#06B6D4',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 6,
   },
   title: {
     fontSize: 24,

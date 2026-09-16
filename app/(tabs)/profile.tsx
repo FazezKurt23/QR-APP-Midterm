@@ -77,7 +77,7 @@ export default function ProfileScreen() {
         </View>
       ) : (
         <View style={[styles.roleBadge, styles.roleBadgeStudent]}>
-          <Text style={styles.roleBadgeText}>Student</Text>
+          <Text style={styles.roleBadgeTextDark}>Student</Text>
         </View>
       )}
 
@@ -90,7 +90,7 @@ export default function ProfileScreen() {
               value={draftName}
               onChangeText={setDraftName}
               placeholder="Your name"
-              placeholderTextColor={COLORS.textSecondary}
+              placeholderTextColor={COLORS.muted}
               editable={!saving}
             />
             <Pressable
@@ -149,26 +149,42 @@ const styles = StyleSheet.create({
   roleBadge: {
     alignSelf: 'flex-start',
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginBottom: 16,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 4,
   },
   roleBadgeStudent: {
-    backgroundColor: COLORS.warning,
+    backgroundColor: COLORS.accent,
+    shadowColor: '#06B6D4',
   },
   roleBadgeText: {
     color: COLORS.textOnPrimary,
     fontWeight: '700',
     fontSize: 13,
   },
+  roleBadgeTextDark: {
+    color: '#0B0813',
+    fontWeight: '700',
+    fontSize: 13,
+  },
   infoCard: {
     backgroundColor: COLORS.card,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.cardBorderNeon,
     padding: 16,
     marginBottom: 24,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 2,
   },
   label: {
     fontSize: 12,
@@ -194,7 +210,7 @@ const styles = StyleSheet.create({
   editHint: {
     fontSize: 13,
     fontWeight: '600',
-    color: COLORS.primary,
+    color: COLORS.accent,
   },
   nameEditRow: {
     flexDirection: 'row',
@@ -204,7 +220,7 @@ const styles = StyleSheet.create({
   nameInput: {
     flex: 1,
     backgroundColor: COLORS.background,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingHorizontal: 12,
@@ -214,9 +230,16 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#A78BFA',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.55,
+    shadowRadius: 10,
+    elevation: 6,
   },
   saveText: {
     color: COLORS.textOnPrimary,

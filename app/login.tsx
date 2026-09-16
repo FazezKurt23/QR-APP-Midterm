@@ -75,7 +75,7 @@ export default function LoginScreen() {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="your.email@school.edu"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={COLORS.muted}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 editable={!loading}
@@ -87,7 +87,7 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your password"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={COLORS.muted}
                 secureTextEntry
                 editable={!loading}
               />
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: COLORS.card,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingHorizontal: 14,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 14,
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontWeight: '600',
   },
 });

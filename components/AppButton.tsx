@@ -45,7 +45,7 @@ export default function AppButton({
 
 const styles = StyleSheet.create({
   buttonInner: {
-    borderRadius: 10,
+    borderRadius: 14,
     paddingVertical: 16,
     paddingHorizontal: 16,
     alignItems: 'center',
@@ -55,12 +55,22 @@ const styles = StyleSheet.create({
   primaryFill: {
     backgroundColor: COLORS.primary,
     borderWidth: 1,
-    borderColor: COLORS.primary,
+    borderColor: '#A78BFA',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.55,
+    shadowRadius: 12,
+    elevation: 8,
   },
   secondaryFill: {
-    backgroundColor: COLORS.card,
+    backgroundColor: '#151022CC',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.cardBorderNeon,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 2,
   },
   row: {
     flexDirection: 'row',
