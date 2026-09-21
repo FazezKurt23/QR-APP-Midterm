@@ -10,11 +10,35 @@ type AuthState = {
 
 let globalSession: Session | null = null;
 let globalUser: User | null = null;
-let globalLoading = false;
+let globalLoading = true;
+let initialized = false;
 let listeners: Set<() => void> = new Set();
 
 function notify() {
   listeners.forEach((l) => l());
+}
+
+async function initAuth() {
+  if (initialized) return;
+  initialized = true;
+  try {
+    const { data } = await supabase.auth.getSession();
+    globalSession = data.session;
+    globalUser = data.session?.user ?? null;
+  } catch {
+    globalSession = null;
+    globalUser = null;
+  } finally {
+    globalLoading = false;
+    notify();
+  }
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    globalSession = session;
+    globalUser = session?.user ?? null;
+    globalLoading = false;
+    notify();
+  });
 }
 
 export function setAuth(session: Session | null) {
@@ -30,6 +54,7 @@ export function useAuth(): AuthState {
   useEffect(() => {
     const listener = () => forceRender((n) => n + 1);
     listeners.add(listener);
+    initAuth();
     return () => {
       listeners.delete(listener);
     };

@@ -127,7 +127,9 @@ export default function TeacherScreen() {
         setMessage('Could not save the event. Please try again.');
         return;
       }
-      setMessage('Event saved! Scan the QR with the Scan tab to test it.');
+      setMessage(
+        'Event saved! Ask a student to scan the QR with their own student account to test it.'
+      );
       setPayload(buildQRPayload(eventData));
     });
   };

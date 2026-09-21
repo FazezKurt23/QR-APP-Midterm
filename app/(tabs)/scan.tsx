@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
 import AppButton from '@/components/AppButton';
 import { COLORS } from '@/constants/colors';
 import { useAuth } from '@/lib/auth';
+import { getProfile, type Role } from '@/lib/profiles';
 import { registerAttendance } from '@/lib/attendance';
 
 export default function ScanScreen() {
@@ -14,6 +15,29 @@ export default function ScanScreen() {
   const [lastData, setLastData] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [profileName, setProfileName] = useState<string | null>(null);
+  const [profileRole, setProfileRole] = useState<Role | null>(null);
+  const [identityLoading, setIdentityLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    if (!user) {
+      setProfileName(null);
+      setProfileRole(null);
+      setIdentityLoading(false);
+      return;
+    }
+    setIdentityLoading(true);
+    getProfile(user.id).then((profile) => {
+      if (!active) return;
+      setProfileName(profile?.full_name ?? null);
+      setProfileRole(profile?.role ?? null);
+      setIdentityLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
   if (!permission) {
     return <View style={styles.container} />;
@@ -40,12 +64,36 @@ export default function ScanScreen() {
     if (scanned) return;
     setScanned(true);
     setLastData(data);
-    const studentId = user?.id ?? 'unknown';
-    registerAttendance(data, studentId).then((result) => {
+
+    // Attendance is always recorded for the LOGGED-IN account.
+    // Block scans that would record the wrong person.
+    if (!user) {
+      setMessage('Please log in first. Attendance needs an account.');
+      setSuccess(false);
+      return;
+    }
+    if (identityLoading) {
+      setMessage('Checking your account... please tap Scan Again.');
+      setSuccess(false);
+      return;
+    }
+    if (profileRole === 'teacher') {
+      setMessage(
+        'Teachers cannot record attendance. Log in with a student account to scan.'
+      );
+      setSuccess(false);
+      return;
+    }
+
+    registerAttendance(data, user.id).then((result) => {
       setMessage(result.message);
       setSuccess(result.success);
     });
   };
+
+  const identityLabel = identityLoading
+    ? 'Checking account...'
+    : profileName ?? user?.email ?? 'Not logged in';
 
   return (
     <View style={styles.container}>
@@ -56,6 +104,12 @@ export default function ScanScreen() {
         onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
       />
       <View style={styles.overlay}>
+        <View style={styles.identityBar}>
+          <Text style={styles.identityLabel}>Scanning as:</Text>
+          <Text style={styles.identityName} numberOfLines={1}>
+            {identityLabel}
+          </Text>
+        </View>
         {message ? (
           <View style={styles.card}>
             <Text
@@ -122,6 +176,24 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 16,
+    gap: 10,
+  },
+  identityBar: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  identityLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  identityName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
   card: {
     backgroundColor: COLORS.card,
