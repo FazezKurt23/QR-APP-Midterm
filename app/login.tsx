@@ -18,6 +18,7 @@ import AppButton from '@/components/AppButton';
 import Header from '@/components/Header';
 import { COLORS } from '@/constants/colors';
 import { signIn } from '@/lib/auth';
+import { supabaseConfigError } from '@/lib/supabase';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -29,6 +30,10 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     setError(null);
+    if (supabaseConfigError) {
+      setError(supabaseConfigError);
+      return;
+    }
     setLoading(true);
 
     try {

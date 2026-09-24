@@ -88,6 +88,7 @@ export default function TeacherScreen() {
   ) => {
     if (event.type === 'dismissed') {
       setEditTarget(null);
+      setEditingPart('date');
       return;
     }
     if (selected) {
@@ -165,7 +166,7 @@ export default function TeacherScreen() {
         style={styles.input}
         onPress={() => {
           setEditTarget('start');
-          setEditingPart(Platform.OS === 'android' ? 'date' : 'date');
+          setEditingPart('date');
         }}
       >
         <Text style={styles.inputText}>{startDate.toLocaleString()}</Text>
@@ -176,7 +177,7 @@ export default function TeacherScreen() {
         style={styles.input}
         onPress={() => {
           setEditTarget('end');
-          setEditingPart(Platform.OS === 'android' ? 'date' : 'date');
+          setEditingPart('date');
         }}
       >
         <Text style={styles.inputText}>{endDate.toLocaleString()}</Text>

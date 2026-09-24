@@ -27,17 +27,17 @@ export default function HomeScreen() {
           theme="primary"
           title="Scan QR Code"
           icon="qr-code-outline"
-          onPress={() => router.push('/scan')}
+          onPress={() => router.push('/(tabs)/scan')}
         />
         <AppButton
           title="Attendance History"
           icon="time-outline"
-          onPress={() => router.push('/history')}
+          onPress={() => router.push('/(tabs)/history')}
         />
         <AppButton
           title="Profile"
           icon="person-outline"
-          onPress={() => router.push('/profile')}
+          onPress={() => router.push('/(tabs)/profile')}
         />
       </View>
     </SafeAreaView>

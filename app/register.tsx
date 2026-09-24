@@ -19,6 +19,7 @@ import AppButton from '@/components/AppButton';
 import Header from '@/components/Header';
 import { COLORS } from '@/constants/colors';
 import { signUp } from '@/lib/auth';
+import { supabaseConfigError } from '@/lib/supabase';
 
 export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
@@ -34,6 +35,11 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     setError(null);
+
+    if (supabaseConfigError) {
+      setError(supabaseConfigError);
+      return;
+    }
 
     if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
       setError('All fields are required.');
