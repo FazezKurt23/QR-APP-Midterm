@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "QR-ATT",
-    "slug": "qr-att",
+    "name": "KUrt.AI QR-ATT",
+    "slug": "qr-attend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,7 +19,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.kurtai.qratt"
+      "package": "com.kurtjohndoligol.qratt"
     },
     "web": {
       "bundler": "metro",
@@ -50,7 +50,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "9bf0036d-d792-4551-8229-b9c6944d63ca"
+        "projectId": "0b0fe1cc-0924-44a7-83ba-e5c88102e3ea"
       }
     }
   }

@@ -25,37 +25,66 @@
 
 -- Profiles: per-user profile that references Supabase Auth.
 -- Created automatically for each new signed-up user.
+-- Roles: student | teacher | admin (admin assigned manually via SQL).
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   email text not null,
   full_name text,
-  role text not null default 'student' check (role in ('student', 'teacher')),
+  student_id text,
+  course text,
+  year_section text,
+  role text not null default 'student' check (role in ('student', 'teacher', 'admin')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 -- Events: an attendance event (mirrors SQLite `events`).
 -- `event_code` is the public identifier embedded in the QR code.
+-- status: 'open' accepts scans, 'closed' rejects scans.
 create table if not exists public.events (
   id uuid primary key default gen_random_uuid(),
   event_code text not null unique,
   title text not null,
+  description text,
+  venue text,
+  status text not null default 'open' check (status in ('open', 'closed')),
   start_time timestamptz,
   end_time timestamptz,
+  qr_secret text,
+  late_after_minutes integer not null default 15,
+  latitude double precision,
+  longitude double precision,
+  radius_meters integer not null default 0,
   created_by uuid references auth.users (id) on delete set null,
   created_at timestamptz not null default now()
 );
 
+-- Backfill columns when re-running on an existing database.
+alter table public.profiles add column if not exists student_id text;
+alter table public.profiles add column if not exists course text;
+alter table public.profiles add column if not exists year_section text;
+alter table public.events add column if not exists qr_secret text;
+alter table public.events add column if not exists late_after_minutes integer not null default 15;
+alter table public.events add column if not exists latitude double precision;
+alter table public.events add column if not exists longitude double precision;
+alter table public.events add column if not exists radius_meters integer not null default 0;
+alter table public.events add column if not exists venue text;
+alter table public.events add column if not exists status text not null default 'open';
+
 -- Attendance: one student scanning one event.
 -- `student_id` references the auth user, `event_id` references events.
 -- Mirrors SQLite `attendance` table and its UNIQUE constraint.
+-- status: 'present' by default; 'late' when past grace period; admin may correct to 'absent'/'excused'.
 create table if not exists public.attendance (
   id uuid primary key default gen_random_uuid(),
   student_id uuid not null references auth.users (id) on delete cascade,
   event_id uuid not null references public.events (id) on delete cascade,
+  status text not null default 'present' check (status in ('present', 'late', 'absent', 'excused')),
   scanned_at timestamptz not null default now(),
   unique (student_id, event_id)
 );
+
+alter table public.attendance add column if not exists status text not null default 'present';
 
 -- ------------------------------------------------------------
 -- 2. ROW LEVEL SECURITY + POLICIES (after all tables exist)
@@ -64,6 +93,36 @@ create table if not exists public.attendance (
 alter table public.profiles enable row level security;
 alter table public.events enable row level security;
 alter table public.attendance enable row level security;
+
+-- Migrate old check constraint so 'admin' role is accepted on
+-- databases created before this update.
+do $$
+begin
+  alter table public.profiles drop constraint if exists profiles_role_check;
+  alter table public.profiles
+    add constraint profiles_role_check check (role in ('student', 'teacher', 'admin'));
+  alter table public.events drop constraint if exists events_status_check;
+  alter table public.events
+    add constraint events_status_check check (status in ('open', 'closed'));
+  alter table public.attendance drop constraint if exists attendance_status_check;
+  alter table public.attendance
+    add constraint attendance_status_check check (status in ('present', 'late', 'absent', 'excused'));
+exception when others then null;
+end $$;
+
+-- Helper: true when the calling user is an admin.
+-- SECURITY DEFINER so it can read profiles under RLS.
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  );
+$$;
 
 -- Profiles policies
 drop policy if exists "Profiles are viewable by owner" on public.profiles;
@@ -96,6 +155,18 @@ create policy "Teachers can view profiles of their attendees"
     )
   );
 
+-- Admins can view every profile (user management).
+drop policy if exists "Admins can view all profiles" on public.profiles;
+create policy "Admins can view all profiles"
+  on public.profiles for select
+  using (public.is_admin());
+
+-- Admins can update any profile (e.g. role changes, corrections).
+drop policy if exists "Admins can update all profiles" on public.profiles;
+create policy "Admins can update all profiles"
+  on public.profiles for update
+  using (public.is_admin());
+
 -- Events policies
 -- Any signed-in user can read event details (needed to validate QR codes)
 drop policy if exists "Events are readable by any authenticated user" on public.events;
@@ -112,6 +183,17 @@ create policy "Users can insert events"
 drop policy if exists "Users can update their own events" on public.events;
 create policy "Users can update their own events"
   on public.events for update
+  using (auth.uid() = created_by or public.is_admin());
+
+-- Admins can delete any event (event management).
+drop policy if exists "Admins can delete events" on public.events;
+create policy "Admins can delete events"
+  on public.events for delete
+  using (public.is_admin());
+
+drop policy if exists "Creators can delete their own events" on public.events;
+create policy "Creators can delete their own events"
+  on public.events for delete
   using (auth.uid() = created_by);
 
 -- Attendance policies
@@ -138,6 +220,22 @@ create policy "Teachers can view attendance for their events"
     )
   );
 
+-- Admins: full attendance visibility + correction (update/delete).
+drop policy if exists "Admins can view all attendance" on public.attendance;
+create policy "Admins can view all attendance"
+  on public.attendance for select
+  using (public.is_admin());
+
+drop policy if exists "Admins can update all attendance" on public.attendance;
+create policy "Admins can update all attendance"
+  on public.attendance for update
+  using (public.is_admin());
+
+drop policy if exists "Admins can delete attendance" on public.attendance;
+create policy "Admins can delete attendance"
+  on public.attendance for delete
+  using (public.is_admin());
+
 -- ------------------------------------------------------------
 -- 3. AUTO-PROFILE TRIGGER (after profiles table exists)
 -- Automatically create a profile after a user signs up
@@ -159,6 +257,11 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- ------------------------------------------------------------
+-- 4. PROMOTE AN ADMIN (run manually after a user registers):
+--    update public.profiles set role = 'admin' where email = 'you@school.edu';
+-- ------------------------------------------------------------
 
 ------------------------------------------------------------
 -- END OF SCHEMA

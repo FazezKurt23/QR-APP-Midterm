@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  Vibration,
+  View,
+} from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Ionicons } from '@expo/vector-icons';
 
 import AppButton from '@/components/AppButton';
 import { COLORS } from '@/constants/colors';
@@ -12,12 +20,15 @@ export default function ScanScreen() {
   const { user } = useAuth();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const [torch, setTorch] = useState(false);
   const [lastData, setLastData] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [profileRole, setProfileRole] = useState<Role | null>(null);
   const [identityLoading, setIdentityLoading] = useState(true);
+  const [manualCode, setManualCode] = useState('');
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -60,13 +71,7 @@ export default function ScanScreen() {
     );
   }
 
-  const handleBarcodeScanned = ({ data }: { data: string }) => {
-    if (scanned) return;
-    setScanned(true);
-    setLastData(data);
-
-    // Attendance is always recorded for the LOGGED-IN account.
-    // Block scans that would record the wrong person.
+  const submitPayload = (data: string) => {
     if (!user) {
       setMessage('Please log in first. Attendance needs an account.');
       setSuccess(false);
@@ -77,32 +82,69 @@ export default function ScanScreen() {
       setSuccess(false);
       return;
     }
-    if (profileRole === 'teacher') {
+    if (profileRole === 'teacher' || profileRole === 'admin') {
       setMessage(
-        'Teachers cannot record attendance. Log in with a student account to scan.'
+        'Teachers/admins cannot record attendance. Log in with a student account to scan.'
       );
       setSuccess(false);
       return;
     }
-
+    setBusy(true);
     registerAttendance(data, user.id).then((result) => {
+      setBusy(false);
       setMessage(result.message);
       setSuccess(result.success);
+      if (result.success) {
+        try {
+          Vibration.vibrate(80);
+        } catch {}
+      } else {
+        try {
+          Vibration.vibrate([0, 60, 60, 60]);
+        } catch {}
+      }
     });
+  };
+
+  const handleBarcodeScanned = ({ data }: { data: string }) => {
+    if (scanned) return;
+    setScanned(true);
+    setLastData(data);
+    submitPayload(data);
+  };
+
+  const handleManualSubmit = () => {
+    if (!manualCode.trim() || busy) return;
+    const code = manualCode.trim().toUpperCase();
+    setScanned(true);
+    setLastData(code);
+    submitPayload(code);
   };
 
   const identityLabel = identityLoading
     ? 'Checking account...'
-    : profileName ?? user?.email ?? 'Not logged in';
+    : (profileName ?? user?.email ?? 'Not logged in');
 
   return (
     <View style={styles.container}>
       <CameraView
         style={styles.camera}
         facing="back"
+        enableTorch={torch}
         barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
         onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
       />
+      <Pressable
+        style={styles.torchBtn}
+        onPress={() => setTorch((t) => !t)}
+        accessibilityLabel="Toggle flashlight"
+      >
+        <Ionicons
+          name={torch ? 'flashlight' : 'flashlight-outline'}
+          size={22}
+          color={torch ? '#0B0813' : '#FFFFFF'}
+        />
+      </Pressable>
       <View style={styles.overlay}>
         <View style={styles.identityBar}>
           <Text style={styles.identityLabel}>Scanning as:</Text>
@@ -112,9 +154,7 @@ export default function ScanScreen() {
         </View>
         {message ? (
           <View style={styles.card}>
-            <Text
-              style={[styles.message, success ? styles.ok : styles.fail]}
-            >
+            <Text style={[styles.message, success ? styles.ok : styles.fail]}>
               {message}
             </Text>
             {lastData ? (
@@ -138,6 +178,25 @@ export default function ScanScreen() {
             <Text style={styles.hint}>
               Point the camera at an event QR code
             </Text>
+            <View style={styles.manualRow}>
+              <TextInput
+                style={styles.manualInput}
+                value={manualCode}
+                onChangeText={setManualCode}
+                placeholder="Or type event code (EVT-...)"
+                placeholderTextColor={COLORS.muted}
+                autoCapitalize="characters"
+                editable={!busy}
+                onSubmitEditing={handleManualSubmit}
+              />
+              <Pressable
+                style={[styles.goBtn, (!manualCode.trim() || busy) && styles.goBtnDisabled]}
+                onPress={handleManualSubmit}
+                disabled={!manualCode.trim() || busy}
+              >
+                <Text style={styles.goText}>{busy ? '...' : 'Go'}</Text>
+              </Pressable>
+            </View>
           </View>
         )}
       </View>
@@ -169,6 +228,19 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  torchBtn: {
+    position: 'absolute',
+    top: 56,
+    right: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#ffffff33',
+    borderWidth: 1,
+    borderColor: '#ffffff55',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   overlay: {
     position: 'absolute',
@@ -212,6 +284,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     textAlign: 'center',
+  },
+  manualRow: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  manualInput: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: COLORS.textPrimary,
+    fontSize: 14,
+  },
+  goBtn: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  goBtnDisabled: {
+    opacity: 0.5,
+  },
+  goText: {
+    color: COLORS.textOnPrimary,
+    fontWeight: '700',
   },
   message: {
     fontSize: 16,
