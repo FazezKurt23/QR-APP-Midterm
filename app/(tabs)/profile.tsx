@@ -21,6 +21,12 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [draftName, setDraftName] = useState('');
+<<<<<<< HEAD
+=======
+  const [draftStudentId, setDraftStudentId] = useState('');
+  const [draftCourse, setDraftCourse] = useState('');
+  const [draftYearSection, setDraftYearSection] = useState('');
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -30,6 +36,12 @@ export default function ProfileScreen() {
     const p = await getProfile(user.id);
     setProfile(p);
     setDraftName(p?.full_name ?? '');
+<<<<<<< HEAD
+=======
+    setDraftStudentId(p?.student_id ?? '');
+    setDraftCourse(p?.course ?? '');
+    setDraftYearSection(p?.year_section ?? '');
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
   }, [user]);
 
   useFocusEffect(
@@ -41,8 +53,22 @@ export default function ProfileScreen() {
   const handleSaveName = async () => {
     if (!user) return;
     setSaving(true);
+<<<<<<< HEAD
     const { error } = await updateProfile(user.id, {
       full_name: draftName.trim(),
+=======
+    const isStudent = profile?.role === 'student';
+    const { error } = await updateProfile(user.id, {
+      full_name: draftName.trim(),
+      // Student-only fields: dili apilon kung teacher/admin.
+      ...(isStudent
+        ? {
+            student_id: draftStudentId.trim() || null,
+            course: draftCourse.trim() || null,
+            year_section: draftYearSection.trim() || null,
+          }
+        : {}),
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
     });
     setSaving(false);
     if (error) {
@@ -70,11 +96,21 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Profile</Text>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
       {profile?.role === 'teacher' ? (
         <View style={styles.roleBadge}>
           <Text style={styles.roleBadgeText}>Teacher</Text>
         </View>
+<<<<<<< HEAD
+=======
+      ) : profile?.role === 'admin' ? (
+        <View style={[styles.roleBadge, styles.roleBadgeAdmin]}>
+          <Text style={styles.roleBadgeText}>Admin</Text>
+        </View>
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
       ) : (
         <View style={[styles.roleBadge, styles.roleBadgeStudent]}>
           <Text style={styles.roleBadgeTextDark}>Student</Text>
@@ -84,6 +120,7 @@ export default function ProfileScreen() {
       <View style={styles.infoCard}>
         <Text style={styles.label}>Name</Text>
         {editing ? (
+<<<<<<< HEAD
           <View style={styles.nameEditRow}>
             <TextInput
               style={styles.nameInput}
@@ -102,6 +139,79 @@ export default function ProfileScreen() {
                 {saving ? 'Saving...' : 'Save'}
               </Text>
             </Pressable>
+=======
+          <View style={{ gap: 10 }}>
+            <View>
+              <Text style={styles.label}>Full Name</Text>
+              <TextInput
+                style={styles.nameInput}
+                value={draftName}
+                onChangeText={setDraftName}
+                placeholder="Your name"
+                placeholderTextColor="#9AA0B4"
+                selectionColor={COLORS.accent}
+                editable={!saving}
+              />
+            </View>
+            {profile?.role === 'student' && (
+              <>
+                <View>
+                  <Text style={styles.label}>Student ID</Text>
+                  <TextInput
+                    style={styles.nameInput}
+                    value={draftStudentId}
+                    onChangeText={setDraftStudentId}
+                    placeholder="Student ID (e.g. 2021-00001)"
+                    placeholderTextColor="#9AA0B4"
+                    selectionColor={COLORS.accent}
+                    editable={!saving}
+                  />
+                </View>
+                <View>
+                  <Text style={styles.label}>Course</Text>
+                  <TextInput
+                    style={styles.nameInput}
+                    value={draftCourse}
+                    onChangeText={setDraftCourse}
+                    placeholder="Course (e.g. BSIT)"
+                    placeholderTextColor="#9AA0B4"
+                    selectionColor={COLORS.accent}
+                    editable={!saving}
+                  />
+                </View>
+                <View>
+                  <Text style={styles.label}>Year & Section</Text>
+                  <TextInput
+                    style={styles.nameInput}
+                    value={draftYearSection}
+                    onChangeText={setDraftYearSection}
+                    placeholder="Year & Section (e.g. 3-A)"
+                    placeholderTextColor="#9AA0B4"
+                    selectionColor={COLORS.accent}
+                    editable={!saving}
+                  />
+                </View>
+              </>
+            )}
+            <View style={styles.nameEditRow}>
+              <Pressable
+                style={[styles.saveButton, { backgroundColor: 'transparent' }]}
+                onPress={() => setEditing(false)}
+                disabled={saving}
+              >
+                <Text style={[styles.saveText, { color: COLORS.textSecondary }]}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={styles.saveButton}
+                onPress={handleSaveName}
+                disabled={saving}
+              >
+                <Text style={styles.saveText}>
+                  {saving ? 'Saving...' : 'Save'}
+                </Text>
+              </Pressable>
+            </View>
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
           </View>
         ) : (
           <Pressable onPress={() => setEditing(true)} style={styles.nameRow}>
@@ -111,6 +221,19 @@ export default function ProfileScreen() {
             <Text style={styles.editHint}>Edit</Text>
           </Pressable>
         )}
+<<<<<<< HEAD
+=======
+        {!editing && profile?.role === 'student' && (
+          <>
+            <Text style={styles.label}>Student ID</Text>
+            <Text style={styles.value}>{profile?.student_id || '—'}</Text>
+            <Text style={styles.label}>Course</Text>
+            <Text style={styles.value}>{profile?.course || '—'}</Text>
+            <Text style={styles.label}>Year & Section</Text>
+            <Text style={styles.value}>{profile?.year_section || '—'}</Text>
+          </>
+        )}
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
 
         <Text style={styles.label}>Email</Text>
         <Text style={styles.value}>{user?.email ?? profile?.email}</Text>
@@ -163,6 +286,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.accent,
     shadowColor: '#06B6D4',
   },
+<<<<<<< HEAD
+=======
+  roleBadgeAdmin: {
+    backgroundColor: COLORS.warning,
+    shadowColor: '#FBBF24',
+  },
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
   roleBadgeText: {
     color: COLORS.textOnPrimary,
     fontWeight: '700',
@@ -218,6 +348,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   nameInput: {
+<<<<<<< HEAD
     flex: 1,
     backgroundColor: COLORS.background,
     borderRadius: 12,
@@ -227,6 +358,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 15,
     color: COLORS.textPrimary,
+=======
+    width: '100%',
+    backgroundColor: '#221A38',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#FFFFFF',
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
   },
   saveButton: {
     backgroundColor: COLORS.primary,

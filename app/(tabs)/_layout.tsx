@@ -1,8 +1,39 @@
+<<<<<<< HEAD
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 
 export default function TabLayout() {
+=======
+import { useEffect, useState } from 'react';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '@/constants/colors';
+import { useAuth } from '@/lib/auth';
+import { getProfile, type Role } from '@/lib/profiles';
+
+export default function TabLayout() {
+  const { user } = useAuth();
+  const [role, setRole] = useState<Role | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    if (!user) {
+      setRole(null);
+      return;
+    }
+    getProfile(user.id).then((profile) => {
+      if (active) setRole(profile?.role ?? 'student');
+    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  const canManage = role === 'teacher' || role === 'admin';
+  const isAdmin = role === 'admin';
+
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
   return (
     <Tabs
       screenOptions={{
@@ -35,6 +66,10 @@ export default function TabLayout() {
         name="scan"
         options={{
           title: 'Scan',
+<<<<<<< HEAD
+=======
+          href: role === 'student' || role === null ? undefined : null,
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="qr-code-outline" size={size} color={color} />
           ),
@@ -52,13 +87,32 @@ export default function TabLayout() {
       <Tabs.Screen
         name="teacher"
         options={{
+<<<<<<< HEAD
           title: 'Teacher',
+=======
+          title: 'Create Event',
+          href: canManage || role === null ? undefined : null,
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="clipboard-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
+<<<<<<< HEAD
+=======
+        name="admin"
+        options={{
+          title: 'Admin',
+          // Admins only.
+          href: isAdmin || role === null ? undefined : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="shield-checkmark-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+>>>>>>> 60502c09d579e3137f719182ab7702bcdf3016e0
         name="profile"
         options={{
           title: 'Profile',
